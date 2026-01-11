@@ -1,0 +1,13 @@
+# Firebase key (sensitive)
+backend/firebase_key.json
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
