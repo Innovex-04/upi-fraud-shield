@@ -43,6 +43,10 @@ def analyze_transaction(amount, time, device, frequency):
     return status, score, reasons
 
 # ---------------- API: ANALYZE (POST) ----------------
+# ---------------- HOME PAGE ----------------
+@app.route("/")
+def home():
+    return "UPI Fraud Shield Server is Running!"
 @app.route("/analyze", methods=["POST"])
 def analyze():
     data = request.json
