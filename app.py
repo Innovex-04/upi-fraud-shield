@@ -3,12 +3,20 @@ from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
 from datetime import datetime
+import os
+import json
 
 app = Flask(__name__)
 CORS(app)
 
 # ---------------- FIREBASE INIT ----------------
-cred = credentials.Certificate("firebase_key.json")
+firebase_key_json = os.environ.get('FIREBASE_KEY')
+if firebase_key_json:
+    cred_dict = json.loads(firebase_key_json)
+    cred = credentials.Certificate(cred_dict)
+else:
+    raise ValueError("FIREBASE_KEY environment variable not set")
+
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -43,10 +51,10 @@ def analyze_transaction(amount, time, device, frequency):
     return status, score, reasons
 
 # ---------------- API: ANALYZE (POST) ----------------
-# ---------------- HOME PAGE ----------------
 @app.route("/")
 def home():
     return "UPI Fraud Shield Server is Running!"
+
 @app.route("/analyze", methods=["POST"])
 def analyze():
     data = request.json
@@ -83,7 +91,7 @@ def analyze():
 @app.route("/transactions", methods=["GET"])
 def get_transactions():
     try:
-        docs = db.collection("transactions").stream()  # Simplified: removed order_by to avoid indexing issues
+        docs = db.collection("transactions").stream()
         result = []
         for doc in docs:
             data = doc.to_dict()
@@ -91,8 +99,8 @@ def get_transactions():
             result.append(data)
         return jsonify(result)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500  # Returns error details if Firebase fails
+        return jsonify({"error": str(e)}), 500
 
 # ---------------- RUN SERVER ----------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
